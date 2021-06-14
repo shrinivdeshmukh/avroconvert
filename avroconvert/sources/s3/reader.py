@@ -35,7 +35,7 @@ class S3:
     def __init__(self, access_key: str = None, secret_key: str = None,
                  session_token: str = None, bucket: str = None, prefix: str = None, datatype: str = 'json'):
         '''
-        
+
         :param access_key: AWS access key id
         :type access_key: str
 

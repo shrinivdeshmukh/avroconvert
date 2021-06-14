@@ -12,6 +12,7 @@ from pyarrow import csv as pac, Table
 from pyarrow.parquet import write_table
 from tempfile import mkstemp, TemporaryDirectory
 
+
 class AvroConvert:
     '''
     A class used to read avro files and convert them to csv,
@@ -99,7 +100,7 @@ class AvroConvert:
                 count += 1
                 f.writerow(row.values())
         return outfile
-        
+
     def to_parquet(self, outfile: str) -> str:
         '''
         Write the avro data to a parquet file
@@ -110,13 +111,14 @@ class AvroConvert:
                         parquet file will be written there.
                         Example: ./data/1970-01-01/FILE.parquet
         :type outfile: str
-            
+
         :returns: path of the output parquet file
         :rtype: str
         '''
         self._check_output_folder(outfile)
         # TODO: support for partitioned storage
-        table = Table.from_pandas(DataFrame(list(chain.from_iterable(self.data))))
+        table = Table.from_pandas(
+            DataFrame(list(chain.from_iterable(self.data))))
         write_table(table, outfile, flavor='spark')
         return outfile
 
@@ -129,7 +131,7 @@ class AvroConvert:
                         json file will be written there.
                         Example: ./data/1970-01-01/FILE.json
         :type outfile: str
-        
+
         :returns: path of the output json file
         :rtype: str
         '''
@@ -137,7 +139,7 @@ class AvroConvert:
         df = DataFrame()
         while len(self.data) > 0:
             df = df.append(self.data.pop())
-        df.to_json(outfile, orient='records')   
+        df.to_json(outfile, orient='records')
         return outfile
 
     def _check_output_folder(self, folderpath: str) -> bool:

@@ -1,5 +1,6 @@
 from os import path, walk
 
+
 class FileSystem:
     '''
     :param datatype: str
@@ -25,16 +26,17 @@ class FileSystem:
         '''
         Lists all files in the local folder (filtering by prefix if one is provided), 
         reads them as bytes, and returns a list of data read from the files.
-       
+
         :returns: list of bytes where each element of the list represents a 
                   file read (in bytes) from local folders.
         :rtype: list
         '''
         supported_types = ['avro']
         if self.datatype not in supported_types:
-            raise TypeError(f'Given datatype {self.datatype} not supported yet!')
-        filelist = [path.join(path1,files1) for path1, currentDirectory, files in walk(self.folder)\
-             for files1 in files if files1.startswith(self.prefix)]
+            raise TypeError(
+                f'Given datatype {self.datatype} not supported yet!')
+        filelist = [path.join(path1, files1) for path1, currentDirectory, files in walk(self.folder)
+                    for files1 in files if files1.startswith(self.prefix)]
         records = [self.read_files(filename=filename) for filename in filelist]
         return records
 
@@ -42,10 +44,10 @@ class FileSystem:
         '''
         Read file from local filesystem and convert it
         into bytes
-        
+
         :param filename: Name of the file to read from local folder
         :type filename: str
-        
+
         :returns: avro file from local folder, converted to bytes
         :rtype: bytes
         '''

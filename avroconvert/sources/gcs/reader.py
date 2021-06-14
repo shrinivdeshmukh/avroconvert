@@ -2,6 +2,7 @@ from google.cloud import storage
 from os import getenv
 from avroconvert import logger
 
+
 class GCS:
     '''
     A class used to read files from google cloud storage and
@@ -97,7 +98,7 @@ class GCS:
         starting with a prefix (if prefix is passed). It
         then calls another method called `read_files` to
         read each file
-       
+
         :returns: list of bytes where each element of the list is
                   the file read (as bytes) from google storage bucket
         :rtype: list
@@ -114,11 +115,11 @@ class GCS:
         '''
         Read file from google cloud bucket and convert it
         into bytes
-        
+
         :param filename: Name of the file to read from google 
                          cloud bucket
         :type filename: str
-        
+
         :returns: avro file from google, converted to bytes
         :rtype: bytes
         '''
@@ -131,14 +132,15 @@ class GCS:
         '''
         Lists all files in S3 (filtering by prefix if one is provided), 
         reads them as bytes, and returns a list of data read from the files.
-       
+
         :returns: list of bytes where each element of the list represents a 
                   file read (in bytes) from Google Storage Bucket.
         :rtype: list
         '''
         supported_types = ['avro']
         if self.datatype not in supported_types:
-            raise TypeError(f'Given datatype {self.datatype} not supported yet!')
+            raise TypeError(
+                f'Given datatype {self.datatype} not supported yet!')
 
         raw_data_list = self._extract_raw_data()
         return raw_data_list
