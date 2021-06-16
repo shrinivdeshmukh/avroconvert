@@ -1,5 +1,6 @@
 import boto3 as bt
 from os import getenv
+from avroconvert import logger
 
 
 class S3:
@@ -33,7 +34,7 @@ class S3:
     '''
 
     def __init__(self, access_key: str = None, secret_key: str = None,
-                 session_token: str = None, bucket: str = None, prefix: str = None, datatype: str = 'json'):
+                 session_token: str = None, bucket: str = None, prefix: str = '', datatype: str = 'avro'):
         '''
 
         :param access_key: AWS access key id
@@ -97,22 +98,26 @@ class S3:
 
         return s3_client.Bucket(getenv('BUCKET', bucket))
 
-    def _extract_raw_data(self) -> list:
+    def _extract_raw_data(self) -> dict:
         '''
         It lists all the files in s3 bucket
         starting with a prefix (if prefix is passed). It
         then calls another method called `read_files` to
         read each file
 
-        :returns: list of bytes where each element of the list is
-                  the file read (as bytes) from google storage bucket
-        :rtype: list
+        :returns: dictionary of bytes where each key of the dict is
+                  the file name of the input file and it's value is 
+                  the data read (as bytes) from that file
+        :rtype: dict
         '''
         logger.info('Listing files in S3')
         s3_files = [y.key for y in self.client.objects.filter(
             Prefix=self.prefix)]
-        data = [self._read_files(filename=s3_file)
-                for s3_file in s3_files]
+        if not s3_files:
+            logger.info(f'No files with prefix {self.prefix} found in S3')
+            return None
+        data = {s3_file: self._read_files(filename=s3_file)
+                for s3_file in s3_files if s3_file.endswith('.avro')}
         return data
 
     def _read_files(self, filename: str) -> bytes:
@@ -127,7 +132,7 @@ class S3:
         raw_data = data_s3_object['Body'].read()
         return raw_data
 
-    def get_data(self) -> list:
+    def get_data(self) -> dict:
         '''
         Lists all files in S3 (filtered by prefix, if it is passed),
         reads the files as bytes and returns a list of data read from 
@@ -139,5 +144,5 @@ class S3:
         '''
         if self.datatype not in ['avro', 'json', 'csv', 'parquet']:
             return f'Given datatype {self.datatype} not supported yet!'
-        raw_data_list = self._extract_raw_data()
-        return raw_data_list
+        raw_data_dict = self._extract_raw_data()
+        return raw_data_dict

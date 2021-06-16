@@ -10,4 +10,4 @@ from avroconvert.log_source import Logging
 logger = Logging(log_level=getenv('LOG_LEVEL', 'INFO')).get_logger()
 
 from avroconvert.avroconvert import AvroConvert
-from avroconvert.sources import gcs_reader, s3_reader, fs_reader
+from avroconvert.sources import gs_reader, s3_reader, fs_reader

@@ -1,5 +1,5 @@
 from google.cloud import storage
-from os import getenv
+from os import getenv, path
 from avroconvert import logger
 
 
@@ -99,17 +99,40 @@ class GCS:
         then calls another method called `read_files` to
         read each file
 
-        :returns: list of bytes where each element of the list is
-                  the file read (as bytes) from google storage bucket
-        :rtype: list
+        :returns: dictionary of bytes where each key of the dict is
+                  the file name of the input file and it's value is 
+                  the data read (as bytes) from that file
+        :rtype: dict
         '''
         logger.info('Listing files in GCS')
-        gcs_files = [x.name for x in self.client.list_blobs(
-            prefix=self.prefix)]
+        gcs_files = self._filter()
+        if not gcs_files:
+            logger.info(f'No files with prefix {self.prefix} found in GCS')
+            return None
 
-        data = [self._read_files(filename=gcs_file)
-                for gcs_file in gcs_files]
+        data = {gcs_file: self._read_files(filename=gcs_file)
+                for gcs_file in gcs_files if gcs_file.endswith('.avro')}
         return data
+
+    def _filter(self):
+        '''
+        Helper function to avoid reading empty folders
+        from google storage buckets
+        '''
+        files = list()
+
+        for blob in self.client.list_blobs(prefix=self.prefix):
+            try:
+                filename = blob.name
+                if filename.split('/')[1] == '' \
+                        and path.dirname(filename) == filename.split('/')[0]:
+                    continue
+                else:
+                    files.append(filename)
+            except IndexError as e:
+                files.append(filename)
+                continue
+        return files
 
     def _read_files(self, filename: str) -> bytes:
         '''
@@ -142,5 +165,5 @@ class GCS:
             raise TypeError(
                 f'Given datatype {self.datatype} not supported yet!')
 
-        raw_data_list = self._extract_raw_data()
-        return raw_data_list
+        raw_data_dict = self._extract_raw_data()
+        return raw_data_dict

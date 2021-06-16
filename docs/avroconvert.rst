@@ -28,6 +28,14 @@ avroconvert.cli module
    :undoc-members:
    :show-inheritance:
 
+avroconvert.execute module
+--------------------------
+
+.. automodule:: avroconvert.execute
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 avroconvert.log\_source module
 ------------------------------
 

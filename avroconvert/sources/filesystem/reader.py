@@ -1,4 +1,5 @@
 from os import path, walk
+from avroconvert import logger
 
 
 class FileSystem:
@@ -17,8 +18,8 @@ class FileSystem:
         :type prefix: str
     '''
 
-    def __init__(self, folder: str, prefix: str, datatype: str):
-        self.folder = folder
+    def __init__(self, bucket: str, prefix: str = None, datatype: str = 'avro'):
+        self.folder = bucket
         self.prefix = prefix
         self.datatype = datatype
 
@@ -35,9 +36,14 @@ class FileSystem:
         if self.datatype not in supported_types:
             raise TypeError(
                 f'Given datatype {self.datatype} not supported yet!')
-        filelist = [path.join(path1, files1) for path1, currentDirectory, files in walk(self.folder)
-                    for files1 in files if files1.startswith(self.prefix)]
-        records = [self.read_files(filename=filename) for filename in filelist]
+        if self.prefix:
+            filelist = [path.join(path1, ea_file) for path1, currentDirectory, files in walk(self.folder)
+                        for ea_file in files if ea_file.startswith(self.prefix)]
+        else:
+            filelist = [path.join(path1, ea_file) for path1, currentDirectory, files in walk(self.folder)
+                        for ea_file in files]
+
+        records = {filename: self.read_files(filename=filename) for filename in filelist if filename.endswith('.avro')}
         return records
 
     def read_files(self, filename: str):
@@ -51,6 +57,7 @@ class FileSystem:
         :returns: avro file from local folder, converted to bytes
         :rtype: bytes
         '''
+        logger.info(f'Reading file {filename} from filesystem in bytes')
         with open(filename, 'rb') as f:
             data = f.read()
         return data

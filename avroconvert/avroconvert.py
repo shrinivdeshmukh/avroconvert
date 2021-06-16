@@ -10,29 +10,24 @@ from pandas import DataFrame
 from pathlib import Path
 from pyarrow import csv as pac, Table
 from pyarrow.parquet import write_table
-from tempfile import mkstemp, TemporaryDirectory
-
 
 class AvroConvert:
     '''
     A class used to read avro files and convert them to csv,
     parquet and json format
 
+    :param outfolder: output folder to write the output files
+                     to
+    :type outfolder: str
+
     :param header: Extracts header from the file if it is set to True
     :type header: bool
 
     :param dst_format: Specifies the format to convert the avro data to
     :type dst_format: str
-
-    :param data: Contains raw data in the form of bytes as read from 
-                filesystem, google cloud storage or S3. Multiple 
-                files are read sequentially and their respective data
-                is appended to this list which is passed as the
-                variable `data`
-    :type data: list
     '''
 
-    def __init__(self, data: list, dst_format: str = 'csv', header: bool = False):
+    def __init__(self, outfolder: str, dst_format: str = 'parquet', header: bool = True):
         """
         :param header: Extracts header from the file if it is set to True
         :type header: bool
@@ -48,41 +43,63 @@ class AvroConvert:
         :type data: list
         """
         self.header = header
-        self.dst_format = dst_format
-        self.data = self.read_avro(data)
+        self.dst_format = dst_format.lower()
+        # self.data = data
+        self.outfolder = outfolder
 
-    def read_avro(self, data: list) -> list:
+    def convert_avro(self, filename: str, data: bytes) -> str:
         '''
-        Reads bytes data and converts it to avro format
+        Reads byte data, converts it to avro format and writes
+        the data to the local filesystem to the output format
+        specified.
+
+        :param filename: Name of the input file (with it's source path). 
+                        The output file will be saved by the same name,
+                        within the same folder hierarchy as it was in 
+                        the source file system. The extension will be 
+                        changed as per the given output format
+        :type filename: str
 
         :param data: Contains raw data in the form of bytes as read from 
                     filesystem, google cloud storage or S3. Multiple 
                     files are read sequentially and their respective data
                     is appended to this list which is passed as the
                     variable `data`
-        :type data: list
+        :type data: bytes
 
-        :returns: list containing avro data
-        :rtype: list
+        :returns: File name with path of the output file
+        :rtype: str
         '''
+        if not bool(data):
+            return None
         logger.info('Converting bytes to avro')
+        logger.info(f'File {filename} in progress')
         records = list()
-        logger.debug(f'Data from total {len(data)} read')
-        while len(data) > 0:
-            logger.debug('Reading data from avro generator object')
-            record = [r for r in reader(BytesIO(data.pop()))]
-            records.append(record)
-        return records
+        logger.debug(f'Data from total {len(data)} files read')
+        writer_function = getattr(self, f'_to_{self.dst_format}')
+        avrodata = [r for r in reader(BytesIO(data))]
+        logger.info(
+            f'Total {len(avrodata)} records found in file is {filename}')
 
-    def to_csv(self, outfile: str) -> str:
+        outfile = join(self.outfolder, self._change_file_extn(filename))
+        writer_function(data=avrodata, outfile=outfile)
+        logger.info(f'[COMPLETED] File {outfile} complete')
+        return f'File {outfile} complete'
+
+    def _to_csv(self, data, outfile: str) -> str:
         '''
         Write the avro data to a csv file
+
+        :param data: Avro formatted data
+        :type data: avro data
+
         :param outfile: Output filepath. The avro data which is 
                         converted to csv, will be stored at this location. 
                         If a non-existent folder name is given, 
                         the folder will be created and the csv file will 
                         be written there.
                         Example: ./data/1970-01-01/FILE.csv
+        :type outfile: str
 
         :returns: path of the output csv file
         :rtype: str
@@ -90,21 +107,22 @@ class AvroConvert:
         count = 0
         self._check_output_folder(outfile)
         f = csv.writer(open(outfile, "w+"))
-        while len(self.data) > 0:
-            record = self.data.pop()
-            for row in record:
-                if self.header == True:
-                    header = row.keys()
-                    f.writerow(header)
-                    self.header = False
-                count += 1
-                f.writerow(row.values())
+        for row in data:
+            if self.header == True:
+                header = row.keys()
+                f.writerow(header)
+                self.header = False
+            count += 1
+            f.writerow(row.values())
         return outfile
 
-    def to_parquet(self, outfile: str) -> str:
+    def _to_parquet(self, data, outfile: str) -> str:
         '''
         Write the avro data to a parquet file
 
+        :param data: Avro formatted data
+        :type data: avro data
+        
         :param outfile: Output filepath. The avro data which is converted to 
                         parquet, will be stored at this location. If a non-existent 
                         folder name is given, the folder will be created and the
@@ -117,14 +135,20 @@ class AvroConvert:
         '''
         self._check_output_folder(outfile)
         # TODO: support for partitioned storage
+        # table = Table.from_pandas(
+        #     DataFrame(list(chain.from_iterable(self.data))))
         table = Table.from_pandas(
-            DataFrame(list(chain.from_iterable(self.data))))
+            DataFrame(data))
         write_table(table, outfile, flavor='spark')
         return outfile
 
-    def to_json(self, outfile: str) -> str:
+    def _to_json(self, data, outfile: str) -> str:
         '''
         Write the avro data to a json file
+        
+        :param data: Avro formatted data
+        :type data: avro data
+
         :param outfile: Output filepath. The avro data which is converted to 
                         json, will be stored at this location. If a non-existent 
                         folder name is given, the folder will be created and the
@@ -136,9 +160,9 @@ class AvroConvert:
         :rtype: str
         '''
         self._check_output_folder(outfile)
-        df = DataFrame()
-        while len(self.data) > 0:
-            df = df.append(self.data.pop())
+        df = DataFrame(data)
+        # while len(self.data) > 0:
+        # df = df.append(self.data.pop())
         df.to_json(outfile, orient='records')
         return outfile
 
@@ -156,3 +180,21 @@ class AvroConvert:
         if not exists(folderpath):
             Path(folderpath).mkdir(parents=True, exist_ok=True)
         return True
+
+    def _change_file_extn(self, filename: str) -> str:
+        '''
+        Change the input file extension to given
+        output format
+
+        :param filename: name of the input file with .avro
+                         extension
+        :type filename: str
+
+        :returns: name of the output file with output file
+                  extension
+        :rtype: str
+        '''
+        p = Path(filename)
+        new_filename = p.parent.joinpath(f'{p.stem}.{self.dst_format}')
+        new_filename = str(new_filename)
+        return new_filename
