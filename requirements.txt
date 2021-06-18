@@ -8,6 +8,7 @@ certifi==2021.5.30
 cffi==1.14.5
 chardet==4.0.0
 colorama==0.4.4
+coverage==5.5
 docutils==0.17.1
 fastavro==1.0.0.post1
 google-api-core==1.22.4
