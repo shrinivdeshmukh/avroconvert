@@ -23,7 +23,6 @@ google-crc32c==1.0.0
 google-resumable-media==1.1.0
 googleapis-common-protos==1.52.0
 grpcio==1.38.0
-httplib2==0.19.1.post2105132137
 idna==2.10
 importlib-metadata==4.5.0
 jmespath==0.10.0
