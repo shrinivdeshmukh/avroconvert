@@ -2,6 +2,7 @@
 
 [![codecov](https://codecov.io/gh/shrinivdeshmukh/avroconvert/branch/main/graph/badge.svg?token=HKF3Q637NV)](https://codecov.io/gh/shrinivdeshmukh/avroconvert)
 [![docs](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat)](https://avroconvert.readthedocs.io/en/latest/)
+[![docs](https://img.shields.io/pypi/v/avroconvert)](https://pypi.org/project/avroconvert/)
 
 Utility to convert avro files to csv, json and parquet formats
 
