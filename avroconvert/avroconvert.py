@@ -8,7 +8,7 @@ from json import dump
 from os.path import join, exists, dirname
 from pandas import DataFrame
 from pathlib import Path
-from pyarrow import csv as pac, Table
+from pyarrow import Table
 from pyarrow.parquet import write_table
 
 class AvroConvert:
@@ -73,19 +73,21 @@ class AvroConvert:
         '''
         if not bool(data):
             return None
-        logger.info('Converting bytes to avro')
-        logger.info(f'File {filename} in progress')
-        records = list()
-        logger.debug(f'Data from total {len(data)} files read')
-        avrodata = [r for r in reader(BytesIO(data))]
-        logger.info(
-            f'Total {len(avrodata)} records found in file is {filename}')
+        try:
+            logger.info('Converting bytes to avro')
+            logger.info(f'File {filename} in progress')
+            outfile = join(self.outfolder, self._change_file_extn(filename))
+            avrodata = [r for r in reader(BytesIO(data))]
+            logger.info(
+                f'Total {len(avrodata)} records found in file is {filename}')
 
-        outfile = join(self.outfolder, self._change_file_extn(filename))
-        writer_function = getattr(self, f'_to_{self.dst_format}')
-        writer_function(data=avrodata, outfile=outfile)
-        logger.info(f'[COMPLETED] File {outfile} complete')
-        return f'File {outfile} complete'
+            writer_function = getattr(self, f'_to_{self.dst_format}')
+            writer_function(data=avrodata, outfile=outfile)
+            logger.info(f'[COMPLETED] File {outfile} complete')
+            return f'File {outfile} complete'
+        except Exception as e:
+            logger.exception(f'[FAILED] File {outfile} failed')
+            raise e
 
     def _to_csv(self, data, outfile: str) -> str:
         '''
@@ -106,6 +108,7 @@ class AvroConvert:
         :rtype: str
         '''
         count = 0
+        logger.info(f'Output folder check {outfile}')
         self._check_output_folder(outfile)
         f = csv.writer(open(outfile, "w+"))
         for row in data:

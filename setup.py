@@ -4,7 +4,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -29,7 +29,8 @@ requirements = [
     'googleapis-common-protos==1.52.0',
     'pandas==1.2.0',
     'pyarrow==4.0.1',
-    'pydata-google-auth==1.1.0'
+    'pydata-google-auth==1.1.0',
+    'python-snappy==0.6.0'
 ]
 
 test_requirements = [ ]
@@ -56,7 +57,7 @@ setup(
     },
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme, #+ '\n\n' + history,
     include_package_data=True,
     keywords='avroconvert',
     name='avroconvert',

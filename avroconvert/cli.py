@@ -88,7 +88,7 @@ def main():
                            secret_key=args.secret_key, session_token=args.session_token,
                            outfolder=args.outfolder)
     elif args.command == 'fs':
-        executor = Execute(source='fs', bucket=args.bucket, dst_format=args.format,
+        executor = Execute(source='fs', bucket=args.input_dir, dst_format=args.format,
                            prefix=args.prefix, outfolder=args.outfolder)
     else:
         print('You must supply a source from gs, s3 or fs\n', file=sys.stderr)
