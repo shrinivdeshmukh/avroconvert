@@ -1,5 +1,8 @@
 # avroconvert
 
+[![codecov](https://codecov.io/gh/shrinivdeshmukh/avroconvert/branch/main/graph/badge.svg?token=HKF3Q637NV)](https://codecov.io/gh/shrinivdeshmukh/avroconvert)
+[![docs](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat)](https://avroconvert.readthedocs.io/en/latest/)
+
 Utility to convert avro files to csv, json and parquet formats
 
 * ## Installation
@@ -136,6 +139,7 @@ avroconvert fs  -i <INPUT_DATA_FOLDER> -o <OUTPUT_FOLDER> -f <OUTPUT_FORMAT> -p 
 
 ```
 
+For more details on using the API, please visit [readthedocs](https://avroconvert.readthedocs.io/en/latest/)
 * ## Credits
 
 This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage) project template.
