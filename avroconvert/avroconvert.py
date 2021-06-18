@@ -46,6 +46,7 @@ class AvroConvert:
         self.dst_format = dst_format.lower()
         # self.data = data
         self.outfolder = outfolder
+        self._check_output_folder(outfolder)
 
     def convert_avro(self, filename: str, data: bytes) -> str:
         '''
@@ -76,12 +77,12 @@ class AvroConvert:
         logger.info(f'File {filename} in progress')
         records = list()
         logger.debug(f'Data from total {len(data)} files read')
-        writer_function = getattr(self, f'_to_{self.dst_format}')
         avrodata = [r for r in reader(BytesIO(data))]
         logger.info(
             f'Total {len(avrodata)} records found in file is {filename}')
 
         outfile = join(self.outfolder, self._change_file_extn(filename))
+        writer_function = getattr(self, f'_to_{self.dst_format}')
         writer_function(data=avrodata, outfile=outfile)
         logger.info(f'[COMPLETED] File {outfile} complete')
         return f'File {outfile} complete'
@@ -137,10 +138,14 @@ class AvroConvert:
         # TODO: support for partitioned storage
         # table = Table.from_pandas(
         #     DataFrame(list(chain.from_iterable(self.data))))
-        table = Table.from_pandas(
-            DataFrame(data))
-        write_table(table, outfile, flavor='spark')
-        return outfile
+        logger.info(f'Writing {outfile} to parquet format')
+        try:
+            table = Table.from_pandas(
+                DataFrame(data))
+            write_table(table, outfile, flavor='spark')
+            return outfile
+        except Exception as e:
+            raise e
 
     def _to_json(self, data, outfile: str) -> str:
         '''
@@ -176,8 +181,11 @@ class AvroConvert:
         :returns: True
         :rtype: bool
         '''
-        folderpath = dirname(folderpath)
+        # folderpath = dirname(folderpath)
+        if dirname(folderpath):
+            folderpath = dirname(folderpath)
         if not exists(folderpath):
+            logger.info(f'Path {folderpath} does not exist; creating new folder')
             Path(folderpath).mkdir(parents=True, exist_ok=True)
         return True
 

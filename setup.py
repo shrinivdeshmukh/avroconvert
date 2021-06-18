@@ -11,9 +11,25 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'boto3==1.15.15',
     'fastavro==1.0.0.post1',
     'pandas==1.2.0',
-    'pyarrow==4.0.1'
+    'pyarrow==4.0.1',
+    'google-api-core==1.22.4',
+    'google-api-python-client==1.12.8',
+    'google-auth==1.22.1',
+    'google-auth-httplib2==0.0.4',
+    'google-auth-oauthlib==0.4.2',
+    'google-cloud-bigquery==2.0.0',
+    'google-cloud-bigquery-storage==2.0.0',
+    'google-cloud-core==1.4.2',
+    'google-cloud-storage==1.31.2',
+    'google-crc32c==1.0.0',
+    'google-resumable-media==1.1.0',
+    'googleapis-common-protos==1.52.0',
+    'pandas==1.2.0',
+    'pyarrow==4.0.1',
+    'pydata-google-auth==1.1.0'
 ]
 
 test_requirements = [ ]
