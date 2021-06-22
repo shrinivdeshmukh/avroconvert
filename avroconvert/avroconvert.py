@@ -74,8 +74,7 @@ class AvroConvert:
         if not bool(data):
             return None
         try:
-            logger.info('Converting bytes to avro')
-            logger.info(f'File {filename} in progress')
+            logger.info(f'[COVERTING] File {filename} bytes to avro')
             outfile = join(self.outfolder, self._change_file_extn(filename))
             avrodata = [r for r in reader(BytesIO(data))]
             logger.info(
