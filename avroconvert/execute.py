@@ -67,6 +67,10 @@ class Execute:
         _src = ['s3', 'gs', 'fs']
         _dst_format = ['parquet', 'csv', 'json']
         source = source.lower()
+        if not dst_format:
+            raise AttributeError(f'Output format not specified, should be one of {_dst_format}')
+        if not outfolder:
+            raise AttributeError(f'Please specify an output folder')
         dst_format = dst_format.lower()
         if source not in _src:
             raise Exception(
@@ -101,6 +105,8 @@ class Execute:
         '''
         reader = self._resolve()
         raw_content = reader.get_data()
+        if not raw_content:
+            return f'No Files with prefix {self.prefix} found in bucket {self.bucket}'
         num_process = 0.5*2*cpu_count()*2
         avro_object = avc.AvroConvert(
             dst_format=self.dst_format, outfolder=self.outfolder)

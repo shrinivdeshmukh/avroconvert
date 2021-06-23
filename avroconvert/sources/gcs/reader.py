@@ -163,7 +163,7 @@ class GCS:
         supported_types = ['avro']
         if self.datatype not in supported_types:
             raise TypeError(
-                f'Given datatype {self.datatype} not supported yet!')
+                f'Given datatype {self.datatype} not supported yet')
 
         raw_data_dict = self._extract_raw_data()
         return raw_data_dict

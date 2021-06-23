@@ -22,6 +22,8 @@ class FileSystem:
         self.folder = bucket
         self.prefix = prefix
         self.datatype = datatype
+        if not self.folder:
+            raise AttributeError(f'Please pass the input folder name')
 
     def get_data(self):
         '''
@@ -35,7 +37,7 @@ class FileSystem:
         supported_types = ['avro']
         if self.datatype not in supported_types:
             raise TypeError(
-                f'Given datatype {self.datatype} not supported yet!')
+                f'Given datatype {self.datatype} not supported yet')
         if self.prefix:
             filelist = [path.join(path1, ea_file) for path1, currentDirectory, files in walk(self.folder)
                         for ea_file in files if ea_file.startswith(self.prefix)]

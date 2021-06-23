@@ -87,7 +87,7 @@ class S3:
         :returns: amazon s3 bucket client object
         '''
         if not getenv('BUCKET', bucket):
-            raise AttributeError('Please pass the GCS bucket name')
+            raise AttributeError('Please pass the S3 bucket name')
 
         client_params = dict({'aws_access_key_id': getenv('AWS_ACCESS_KEY_ID') or access_key,
                               'aws_secret_access_key': getenv('AWS_SECRET_ACCESS_KEY') or secret_key,
@@ -123,7 +123,7 @@ class S3:
     def _read_files(self, filename: str) -> bytes:
         '''
         Read file from s3 and convert it into bytes
-        :returns: avro file from google, converted to bytes
+        :returns: avro file from s3, converted to bytes
         :rtype: bytes
         '''
         logger.info(f'Reading file {filename} from S3 in bytes')
@@ -143,6 +143,6 @@ class S3:
         :rtype: list
         '''
         if self.datatype not in ['avro', 'json', 'csv', 'parquet']:
-            return f'Given datatype {self.datatype} not supported yet!'
+            return f'Given datatype {self.datatype} not supported yet'
         raw_data_dict = self._extract_raw_data()
         return raw_data_dict
