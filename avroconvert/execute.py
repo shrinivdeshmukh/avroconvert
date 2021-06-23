@@ -80,8 +80,6 @@ class Execute:
         self.dst_format = dst_format
         self.outfolder = outfolder
         self.params = kwargs
-        self.avro_object = avc.AvroConvert(
-            dst_format=self.dst_format, outfolder=self.outfolder)
 
     def _resolve(self):
         '''
@@ -96,20 +94,17 @@ class Execute:
             bucket=self.bucket, prefix=self.prefix, **self.params)
         return reader
 
-    def _pipe(self, filename: str):
-        reader = self._resolve()
-        file_data = reader._read_files(filename=filename)
-        self.avro_object.convert_avro(filename=filename, data=file_data)
-        return True
-
     def run(self) -> bool:
         '''
         Executor method for the AvroConverter class. This method
         parallelizes the execution for all the file read->convert->write operations.
         '''
         reader = self._resolve()
+        raw_content = reader.get_data()
         num_process = 0.5*2*cpu_count()*2
-        files = reader._extract_raw_data()
+        avro_object = avc.AvroConvert(
+            dst_format=self.dst_format, outfolder=self.outfolder)
         with concurrent.futures.ProcessPoolExecutor(max_workers=int(num_process)) as executor:
-            results = executor.map(self._pipe, files)
+            results = [executor.submit(
+                avro_object.convert_avro, **{'filename': filename, 'data': avrodata}) for filename, avrodata in raw_content.items()]
         return True

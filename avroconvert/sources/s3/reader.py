@@ -116,9 +116,9 @@ class S3:
         if not s3_files:
             logger.info(f'No files with prefix {self.prefix} found in S3')
             return None
-        # data = {s3_file: self._read_files(filename=s3_file)
-        #         for s3_file in s3_files if s3_file.endswith('.avro')}
-        return s3_files
+        data = {s3_file: self._read_files(filename=s3_file)
+                for s3_file in s3_files if s3_file.endswith('.avro')}
+        return data
 
     def _read_files(self, filename: str) -> bytes:
         '''
@@ -126,7 +126,7 @@ class S3:
         :returns: avro file from google, converted to bytes
         :rtype: bytes
         '''
-        logger.info(f'[READING] File {filename}')
+        logger.info(f'Reading file {filename} from S3 in bytes')
         data_s3_object = self.client.meta\
             .client.get_object(Bucket=self.bucket, Key=filename)
         raw_data = data_s3_object['Body'].read()
