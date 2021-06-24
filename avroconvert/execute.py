@@ -78,6 +78,9 @@ class Execute:
         if dst_format not in _dst_format:
             raise Exception(
                 f'Invalid format {dst_format}. It should be one of {_dst_format}')
+        if not bucket:
+            raise Exception(
+                f'Please specify a bucket')
         self.source = source
         self.bucket = bucket
         self.prefix = prefix
@@ -103,11 +106,10 @@ class Execute:
         Executor method for the AvroConverter class. This method
         parallelizes the execution for all the file read->convert->write operations.
         '''
-        reader = self._resolve()
-        raw_content = reader.get_data()
+        raw_content = self._resolve().get_data()
         if not raw_content:
-            return f'No Files with prefix {self.prefix} found in bucket {self.bucket}'
-        num_process = 0.5*2*cpu_count()*2
+            return 
+        num_process = cpu_count()*2
         avro_object = avc.AvroConvert(
             dst_format=self.dst_format, outfolder=self.outfolder)
         with concurrent.futures.ProcessPoolExecutor(max_workers=int(num_process)) as executor:
