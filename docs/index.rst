@@ -7,6 +7,7 @@ Welcome to avroconvert's documentation!
 
    readme
    installation
+   commands
    usage
    modules
    contributing
