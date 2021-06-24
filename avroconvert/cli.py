@@ -10,7 +10,7 @@ def get_config_option(config: configparser.ConfigParser, section: str, option: s
     try:
         return config.get(section, option)
     except configparser.NoSectionError:
-        raise Exception(f'Invalid command {section} called')
+        return None
     except configparser.NoOptionError:
         return None
 
