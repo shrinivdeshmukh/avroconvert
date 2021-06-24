@@ -108,6 +108,11 @@ class TestAvroconvert(TestCase):
         self.assertEqual(actual_response, None)
         print("")
 
+    def test_convert_avro_w_invalid_data(self):
+        avro_obj = avc(outfolder='./test_output', dst_format='csv')
+        with self.assertRaises(Exception) as e:
+            avro_obj.convert_avro(filename='test.csv', data=b'test data')
+
     @mock.patch('avroconvert.avroconvert.DataFrame')
     @mock.patch('avroconvert.avroconvert.Table')
     @mock.patch('avroconvert.avroconvert.write_table')
@@ -135,6 +140,13 @@ class TestAvroconvert(TestCase):
 
         self.assertEqual(actual_response, outfile)
 
+    def test_to_parquet_w_invalid_data(self):
+        avc_obj = avc(outfolder='./test_output', dst_format='parquet')
+        avc_obj._check_output_folder = mock.Mock(side_effect=[True, True])
+        data = 'test-data'
+        with self.assertRaises(Exception) as e:
+            avc_obj._to_parquet(data=data, outfile='test.parquet')
+
     @mock.patch('avroconvert.avroconvert.DataFrame')
     def test_to_json(self, mock_df):
         logger.info(
@@ -156,6 +168,20 @@ class TestAvroconvert(TestCase):
 
         self.assertEqual(actual_response, outfile)
         
+        print("")
+
+    @mock.patch('avroconvert.avroconvert.csv')
+    def test_to_csv(self, mock_csv):
+        avc_obj = avc(outfolder='./test_output', dst_format='csv')
+        avc_obj._check_output_folder = mock.Mock(side_effect=[True, True])
+        data = [{
+            'col1': 'val1', 'col2': 'val2'
+        },{
+            'col1': 'val3', 'col2': 'val4'
+        }]
+        with mock.patch('avroconvert.avroconvert.open', mock.mock_open(read_data='bibble')) as m:
+            function_response = avc_obj._to_csv(data=data, outfile='test.csv')
+        self.assertEqual(function_response, 'test.csv')
         print("")
 
     @mock.patch('avroconvert.avroconvert.exists')

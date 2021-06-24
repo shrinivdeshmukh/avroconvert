@@ -89,6 +89,8 @@ def main():
     fs_parser.add_argument('--config', nargs=1,  help='configuration file path')
 
     args = parser.parse_args()
+
+    bucket, prefix, dst_format, outfolder = None, '', None, None
     if args.config:
         config.read(args.config)
         bucket = get_config_option(config, args.command, 'bucket')
@@ -99,7 +101,14 @@ def main():
     if args.format: dst_format = args.format
     if args.prefix: prefix = args.prefix
     if args.outfolder: outfolder = args.outfolder
-
+    
+    if not dst_format:
+        print('You must supply output format from parquet, csv or json\n', file=sys.stderr)
+    if not prefix:
+        prefix = ''
+    if not outfolder:
+        print('You must supply output directory', file=sys.stderr)
+        
     if args.command == 'gs':
         auth_file = args.auth_file if args.auth_file else get_config_option(config, args.command, 'auth_file')
         if args.bucket: bucket = args.bucket
