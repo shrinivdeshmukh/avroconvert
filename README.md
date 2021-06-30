@@ -6,6 +6,7 @@
 
 Utility to convert avro files to csv, json and parquet formats
 
+[ReadtheDocs](https://avroconvert.readthedocs.io/en/latest/) Documentation
 * ## Installation
 
 Using pypi
